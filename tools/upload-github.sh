@@ -2,14 +2,14 @@
 
 set -e
 
-# Generate GitHub release for a Godot version and upload artifacts.
+# Generate GitHub release for a Redot version and upload artifacts.
 #
 # Usage: ./upload-github.sh -v 3.6
 # Usage: ./upload-github.sh -v 3.6 -f beta3
 # Usage: ./upload-github.sh -v 3.6 -f beta3 -r owner/repository
 #
-# Run this script from the root of the godot-build-scripts folder
-# after building Godot.
+# Run this script from the root of the redot-build-scripts folder
+# after building Redot.
 
 # Folder this script is called from, a.k.a its working directory.
 export basedir=$(pwd)
@@ -22,7 +22,7 @@ export buildsdir=$(dirname "$scriptdir")
 
 if [ ! -d "${basedir}/releases" ] || [ ! -d "${basedir}/tmp" ]; then
   echo "Cannot find one of the required folders: releases, tmp."
-  echo "  Make sure you're running this script from the root of your godot-build-scripts clone, and that Godot has been built with it."
+  echo "  Make sure you're running this script from the root of your redot-build-scripts clone, and that Redot has been built with it."
   exit 1
 fi
 
@@ -30,7 +30,7 @@ fi
 
 godot_version=""
 godot_flavor="stable"
-godot_repository="godotengine/godot-builds"
+godot_repository="Redot-Engine/redot-builds"
 
 while getopts "v:f:r:" opt; do
   case "$opt" in
@@ -53,7 +53,7 @@ echo "Preparing release $release_tag..."
 version_path="$basedir/releases/$release_tag"
 if [ ! -d "${version_path}" ]; then
   echo "Cannot find the release folder at $version_path."
-  echo "  Make sure you're running this script from the root of godot-build-scripts, and that Godot has been built."
+  echo "  Make sure you're running this script from the root of redot-build-scripts, and that Redot has been built."
   exit 1
 fi
 
@@ -71,8 +71,8 @@ if ! $buildsdir/tools/create-release-metadata.py -v $godot_version -f $godot_fla
 fi
 
 cd $buildsdir
-git add ./releases/godot-$release_tag.json
-git commit -m "Add Godot $release_tag"
+git add ./releases/redot-$release_tag.json
+git commit -m "Add Redot $release_tag"
 git tag $release_tag
 if ! git push --atomic origin main $release_tag; then
   echo "Failed to push release metadata for $release_tag to GitHub."

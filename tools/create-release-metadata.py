@@ -20,20 +20,20 @@ def find_file_checksums(release_path):
     return files
 
 
-def generate_file(version_version: str, version_status: str, git_reference: str):
+def generate_file(version_version: str, version_status: str, version_status_version: int, git_reference: str):
     # Open the file for writing.
 
     basedir = os.environ.get("basedir")
     buildsdir = os.environ.get('buildsdir')
 
-    output_path = f"{buildsdir}/releases/godot-{version_version}-{version_status}.json"
+    output_path = f"{buildsdir}/releases/redot-{version_version}-{version_status}.{version_status_version}.json"
     with open(output_path, 'w') as f:
         release_name = version_version
         commit_hash = git_reference
         if version_status == "stable":
             commit_hash = f"{version_version}-stable"
         else:
-            release_name = f"{version_version}-{version_status}"
+            release_name = f"{version_version}-{version_status}.{str(version_status_version)}"
 
         # Start writing the file with basic meta information.
         f.write(
@@ -41,6 +41,7 @@ def generate_file(version_version: str, version_status: str, git_reference: str)
             f'    "name": "{release_name}",\n'
             f'    "version": "{version_version}",\n'
             f'    "status": "{version_status}",\n'
+            f'    "status_version": "{str(version_status_version)}",\n'
             f'    "release_date": {int(datetime.now().timestamp())},\n'
             f'    "git_reference": "{commit_hash}",\n'
             f'\n'
@@ -80,12 +81,13 @@ def generate_file(version_version: str, version_status: str, git_reference: str)
 
 def main() -> None:
     if os.environ.get("basedir") == "" or os.environ.get("buildsdir") == "":
-        print("Failed to create release metadata: Missing 'basedir' (godot-build-scripts) and 'buildsdir' (godot-builds) environment variables.\n")
+        print("Failed to create release metadata: Missing 'basedir' (redot-build-scripts) and 'buildsdir' (redot-builds) environment variables.\n")
         exit(1)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("-v", "--version", default="", help="Godot version in the major.minor.patch format (patch should be omitted for major and minor releases).")
+    parser.add_argument("-v", "--version", default="", help="Redot version in the major.minor.patch format (patch should be omitted for major and minor releases).")
     parser.add_argument("-f", "--flavor", default="stable", help="Release flavor, e.g. dev, alpha, beta, rc, stable (defaults to stable).")
+    parser.add_argument("-s", "--status-version", type=int, default=1, help="Release flavor version, e.g. 1, 2, 3, etc. (defaults to 1).")
     parser.add_argument("-g", "--git", default="", help="Git commit hash tagged for this release.")
     args = parser.parse_args()
 
@@ -96,10 +98,11 @@ def main() -> None:
 
     release_version = args.version
     release_flavor = args.flavor
+    release_status_version = args.status_version
     if release_flavor == "":
         release_flavor = "stable"
 
-    generate_file(release_version, release_flavor, args.git)
+    generate_file(release_version, release_flavor, release_status_version, args.git)
 
 
 if __name__ == "__main__":
